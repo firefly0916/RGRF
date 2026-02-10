@@ -1,5 +1,6 @@
 import re
 from agents.base_agent import BaseAgent
+from prompts.reasoning_prompt import reasoning_instructions
 
 class ReActAgent(BaseAgent):
     def __init__(self, name, model_name, api_key, base_url=None, history_window=8):
@@ -26,6 +27,7 @@ Observation: Predict how this action might affect the next state.
 You must follow this loop and conclude with your final action in the format: 
 [FINAL_ACTION] Action: <value>
 
+{reasoning_instructions()}
 Let's begin.
 """
         # 调用基础类的 LLM 接口

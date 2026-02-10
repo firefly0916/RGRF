@@ -1,5 +1,6 @@
 import re
 from agents.base_agent import BaseAgent
+from prompts.reasoning_prompt import reasoning_instructions
 
 class CoTAgent(BaseAgent):
     def get_action(self, history, game_rules):
@@ -13,6 +14,7 @@ Let's think step by step:
 2. Evaluate the potential rewards for cooperating vs defecting.
 3. Decide the optimal value.
 
+{reasoning_instructions()}
 Format: [FINAL_ACTION] Action: <value between 0 and 1>
 """
         response = self.call_llm(prompt, tag="decision")

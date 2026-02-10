@@ -16,6 +16,9 @@
 # [FINAL_ACTION] Action: <float>
 # """
 
+from prompts.reasoning_prompt import reasoning_instructions
+
+
 def get_decision_template(history, alpha, beta, simulation_summary):
     return f"""
 [Goal-Directed Decision: Trajectory Search]
@@ -31,5 +34,6 @@ Compare the proposals.
 - Observe the "Risk Case": If the worst-case reward is too low, the action is dangerous.
 Choose the action that best balances stability and profit.
 
+{reasoning_instructions()}
 Format: [FINAL_ACTION] Action: <val>
 """

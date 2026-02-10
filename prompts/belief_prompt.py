@@ -17,6 +17,9 @@
 # """
 
 
+from prompts.reasoning_prompt import reasoning_instructions
+
+
 def get_belief_template(history, notes, candidates_with_errors):
     return f"""
 [Task: Opponent Personality Recognition]
@@ -35,6 +38,7 @@ Candidate Models & Physical Accuracy (MSE Error - lower is better):
 2. Do the 'Strategic Memory' notes suggest the opponent is changing their behavior?
 3. Select or propose the final alpha and beta that best describe them now.
 
+{reasoning_instructions()}
 Output Format:
 [FINAL_MODEL] alpha: <float>, beta: <float>
 """

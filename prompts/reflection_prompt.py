@@ -14,6 +14,9 @@
 # [FINAL_NOTE] Note: <text>
 # """
 
+from prompts.reasoning_prompt import reasoning_instructions
+
+
 def get_reflection_template(my_action, opp_action, predicted, alpha, beta):
     # 此函数现在主要由 StrategicAgent 内部组装更复杂的 Prompt
     # 这里提供一个基础框架
@@ -28,5 +31,6 @@ Use the provided Counterfactual Experiment (+0.2 action) to determine if we shou
 Update our strategic approach.
 
 [Output]
+{reasoning_instructions()}
 [FINAL_NOTE] Note: <text>
 """
