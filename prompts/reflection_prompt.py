@@ -17,7 +17,8 @@
 from prompts.reasoning_prompt import reasoning_instructions
 
 
-def get_reflection_template(my_action, opp_action, predicted, alpha, beta):
+def get_reflection_template(my_action, opp_action, predicted, alpha, beta, game_context=""):
+    context_block = f"[Game Context]\n{game_context}\n" if game_context else ""
     # 此函数现在主要由 StrategicAgent 内部组装更复杂的 Prompt
     # 这里提供一个基础框架
     return f"""
@@ -25,6 +26,7 @@ def get_reflection_template(my_action, opp_action, predicted, alpha, beta):
 Last Action: {my_action} | Reality: Opponent played {opp_action}
 Our Model (alpha={alpha}, beta={beta}) expected them to play {predicted}.
 
+{context_block}
 [Task]
 Reflect on the gap between reality and prediction. 
 Use the provided Counterfactual Experiment (+0.2 action) to determine if we should be more assertive or more cooperative.

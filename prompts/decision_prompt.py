@@ -19,12 +19,14 @@
 from prompts.reasoning_prompt import reasoning_instructions
 
 
-def get_decision_template(history, alpha, beta, simulation_summary):
+def get_decision_template(history, alpha, beta, simulation_summary, game_context=""):
+    context_block = f"[Game Context]\n{game_context}\n" if game_context else ""
     return f"""
 [Goal-Directed Decision: Trajectory Search]
 Current Opponent Model: Alpha={alpha}, Beta={beta}.
 (They respond to you with: {alpha} * your_action - {beta})
 
+{context_block}
 Future Simulations (3-round depth):
 {simulation_summary}
 

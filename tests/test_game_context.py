@@ -1,6 +1,7 @@
 import unittest
 
 import prompts.game_context as gc
+from prompts.belief_prompt import get_belief_template
 
 
 class TestGameContext(unittest.TestCase):
@@ -16,6 +17,10 @@ class TestGameContext(unittest.TestCase):
 
     def test_unknown_context_empty(self):
         self.assertEqual("", gc.get_game_context("OTHER"))
+
+    def test_belief_prompt_includes_context(self):
+        text = get_belief_template("hist", "notes", "results", "CTX")
+        self.assertIn("Game Context", text)
 
 
 if __name__ == "__main__":

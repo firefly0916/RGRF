@@ -23,8 +23,9 @@
 import re
 from library.validator import calculate_mse
 from prompts.belief_prompt import get_belief_template
+from prompts.reasoning_prompt import reasoning_instructions
 
-def identify_personality(history, notes, last_model, call_llm):
+def identify_personality(history, notes, last_model, call_llm, game_context=""):
     """
     AMM+CVM 核心模块：
     1. 验证原型性格。
@@ -52,7 +53,7 @@ def identify_personality(history, notes, last_model, call_llm):
     # 使用你定义的 get_belief_template，但增加“提议”指令
     # 告诉 LLM α 和 β 的性格含义，强制它思考“对方为什么变了”
     formatted_results = "\n".join(results_str)
-    prompt = get_belief_template(history, notes, formatted_results)
+    prompt = get_belief_template(history, notes, formatted_results, game_context)
     
     # 第一次调用：让 LLM 进行深度反思并提出最优参数（它可以选原型的，也可以微调）
     response = call_llm(prompt, tag="belief")
@@ -71,6 +72,7 @@ def identify_personality(history, notes, last_model, call_llm):
         # --- 阶段 4: 最终锁定 ---
         # 如果 LLM 提议的误差比原型还大，我们要提醒它（防止幻觉）
         if proposed_mse > min([calculate_mse(history, c["alpha"], c["beta"]) for c in archetypes]):
+            context_block = f"[Game Context]\n{game_context}\n" if game_context else ""
             correction_prompt = f"""
             Wait. Your proposed model (alpha={proposed_alpha}, beta={proposed_beta}) has a high MSE Error of {proposed_mse}.
             This means it doesn't fit the historical data well.
@@ -78,6 +80,8 @@ def identify_personality(history, notes, last_model, call_llm):
             
             Are you sure you want to deviate from the historically accurate models? 
             If yes, explain why. If no, revert to the most accurate model.
+            {context_block}
+            {reasoning_instructions()}
             [FINAL_MODEL] alpha: <val>, beta: <val>
             """
             final_response = call_llm(correction_prompt, tag="belief_correction")

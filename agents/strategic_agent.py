@@ -6,6 +6,7 @@ from library.simulator import predict_future_trajectory
 from prompts.belief_prompt import get_belief_template
 from prompts.decision_prompt import get_decision_template
 from prompts.reflection_prompt import get_reflection_template
+from prompts.game_context import get_game_context
 
 class StrategicAgent(BaseAgent):
     def __init__(self, name, model_name="gpt-4", api_key=None, base_url=None, history_window=8):
@@ -18,6 +19,9 @@ class StrategicAgent(BaseAgent):
         """
         每一轮决策的主入口。
         """
+        game_type = "CPD" if "Prisoner" in game_rules else "PGG"
+        self.game_context = get_game_context(game_type)
+
         history = self.clip_history(history)
         # 1. 多人博弈适配逻辑：将历史预处理为 [我, 他人平均] 视角
         # 这一步非常重要，它把复杂的 N 人博弈简化为“我与环境”的二元对立，降低推理负担
@@ -46,13 +50,15 @@ class StrategicAgent(BaseAgent):
         """
         # 从你专门存放逻辑的文件中导入
         from modules.amm_cvm import identify_personality
+        game_context = getattr(self, "game_context", "")
         
         # 核心：将“物理证据”、“反思记忆”、“旧模型”全部传进去
         new_model = identify_personality(
             processed_history, 
             self.strategic_memory, 
             self.current_opponent_model, 
-            self.call_llm
+            self.call_llm,
+            game_context
         )
         
         return new_model
@@ -65,6 +71,7 @@ class StrategicAgent(BaseAgent):
 
         # 补充：识别游戏类型（用于模拟器公式切换）
         game_type = "CPD" if "Prisoner" in game_rules else "PGG"
+        game_context = getattr(self, "game_context", "") or get_game_context(game_type)
         num_players = 2 if not history else len(history[0])
 
         for action in proposed_actions:
@@ -87,7 +94,7 @@ class StrategicAgent(BaseAgent):
             for s in simulation_data
         ])
         
-        decision_prompt_text = get_decision_template(history, alpha, beta, formatted_simulations)
+        decision_prompt_text = get_decision_template(history, alpha, beta, formatted_simulations, game_context)
         llm_final_choice = self.call_llm(decision_prompt_text, tag="decision")
         
         return self.parse_action(llm_final_choice)
@@ -103,12 +110,14 @@ class StrategicAgent(BaseAgent):
         beta = self.current_opponent_model["beta"]
         predicted_others_move = round(alpha * my_action - beta, 3)
 
+        game_context = getattr(self, "game_context", "")
         reflection_prompt_text = get_reflection_template(
             my_action, 
             avg_others, # 传入平均值进行反思
             predicted_others_move, 
             alpha, 
-            beta
+            beta,
+            game_context
         )
 
         reflection_result = self.call_llm(reflection_prompt_text, tag="reflection")

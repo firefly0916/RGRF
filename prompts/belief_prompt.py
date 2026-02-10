@@ -20,13 +20,15 @@
 from prompts.reasoning_prompt import reasoning_instructions
 
 
-def get_belief_template(history, notes, candidates_with_errors):
+def get_belief_template(history, notes, candidates_with_errors, game_context=""):
+    context_block = f"[Game Context]\n{game_context}\n" if game_context else ""
     return f"""
 [Task: Opponent Personality Recognition]
 We model the opponent using: Opponent_Action = (Alpha * Your_Prev_Action) - Beta.
 - Alpha (Reciprocity): High means they mirror you; Low means they are indifferent.
 - Beta (Greed): High means they deduct a "selfish tax" even if you cooperate.
 
+{context_block}
 Current History: {history}
 Strategic Memory from CRM: {notes}
 
