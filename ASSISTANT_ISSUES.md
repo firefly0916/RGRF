@@ -27,3 +27,7 @@
   Status: resolved. Removed undefined reference and moved metrics into `run_experiment`.
 - Issue: `results/*.json` currently store raw API keys in `metadata.player_configs`.
   Status: resolved. Added sanitizer and redacted existing files.
+
+## 2026-02-10
+- Issue: `git push` to GitHub via SSH failed (DNS/port 22 connection closed).
+  Status: unresolved. May require HTTPS remote or SSH key/network access.
