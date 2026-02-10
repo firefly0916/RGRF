@@ -33,3 +33,7 @@
   Status: unresolved. May require HTTPS remote or SSH key/network access.
 - Update: `ssh -T git@github.com` failed with DNS resolution error on this machine; SSH push still fails.
   Status: unresolved (likely DNS/network blocking github.com).
+
+## 2026-02-10
+- Issue: `python -m unittest discover -s tests` failed in worktree due to missing dependencies (`openai`, `python-dotenv`, `numpy`).
+  Status: unresolved (install deps or run in configured env).
