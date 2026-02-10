@@ -31,3 +31,5 @@
 ## 2026-02-10
 - Issue: `git push` to GitHub via SSH failed (DNS/port 22 connection closed).
   Status: unresolved. May require HTTPS remote or SSH key/network access.
+- Update: `ssh -T git@github.com` failed with DNS resolution error on this machine; SSH push still fails.
+  Status: unresolved (likely DNS/network blocking github.com).
