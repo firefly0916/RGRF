@@ -31,3 +31,12 @@
 
 ### Tests
 - `python -m unittest tests/test_history_window.py`
+
+## 2026-02-10
+- Added reasoning-mode prompt helper controlled by `RGRF_REASONING_MODE`.
+- Added concise game context helper and injected game context into Strategic prompts.
+- Added/updated tests for reasoning mode and game context helpers.
+
+### Tests
+- `python -m unittest tests/test_reasoning_mode.py`
+- `python -m unittest tests/test_game_context.py`
