@@ -40,3 +40,6 @@
 ### Tests
 - `python -m unittest tests/test_reasoning_mode.py`
 - `python -m unittest tests/test_game_context.py`
+
+## 2026-02-10
+- Synced `storage/notes.txt` from worktree run output.
