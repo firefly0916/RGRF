@@ -37,3 +37,5 @@
 ## 2026-02-10
 - Issue: `python -m unittest discover -s tests` failed in worktree due to missing dependencies (`openai`, `python-dotenv`, `numpy`).
   Status: unresolved (install deps or run in configured env).
+- Update: Running tests inside `conda run -n rgrf` succeeds; dependency-related test failures resolved.
+  Status: resolved.
