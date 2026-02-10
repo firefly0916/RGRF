@@ -39,3 +39,5 @@
   Status: unresolved (install deps or run in configured env).
 - Update: Running tests inside `conda run -n rgrf` succeeds; dependency-related test failures resolved.
   Status: resolved.
+- Issue: `conda run -n rgrf python main_experiment.py` produced no output for ~10s; interrupted.
+  Status: unresolved (may be waiting on LLM or blocked before first print).
