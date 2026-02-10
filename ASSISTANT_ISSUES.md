@@ -41,3 +41,5 @@
   Status: resolved.
 - Issue: `conda run -n rgrf python main_experiment.py` produced no output for ~10s; interrupted.
   Status: unresolved (may be waiting on LLM or blocked before first print).
+- Update: `conda run -n rgrf python main_experiment.py` still produced no output after ~120s; interrupted.
+  Status: unresolved (likely blocked before first print or waiting on LLM).
