@@ -43,3 +43,5 @@
   Status: unresolved (may be waiting on LLM or blocked before first print).
 - Update: `conda run -n rgrf python main_experiment.py` still produced no output after ~120s; interrupted.
   Status: unresolved (likely blocked before first print or waiting on LLM).
+- Update: `git push` from master failed again due to DNS resolution for github.com.
+  Status: unresolved on this environment; push may require user-side network.
