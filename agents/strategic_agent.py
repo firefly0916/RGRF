@@ -64,7 +64,11 @@ class StrategicAgent(BaseAgent):
         return new_model
 
     def gdm_module(self, history, game_rules):
-        proposed_actions = [0.2, 0.5, 0.8] 
+        last_my_a = history[-1][0] if history else 0.5
+        base_anchors = [last_my_a - 0.2, last_my_a, last_my_a + 0.2]
+        anchors = sorted({max(0.0, min(1.0, round(a, 2))) for a in base_anchors})
+        if len(anchors) < 3:
+            anchors = sorted(set(anchors + [0.5]))
         simulation_data = []
         alpha = self.current_opponent_model["alpha"]
         beta = self.current_opponent_model["beta"]
@@ -74,7 +78,7 @@ class StrategicAgent(BaseAgent):
         game_context = getattr(self, "game_context", "") or get_game_context(game_type)
         num_players = 2 if not history else len(history[0])
 
-        for action in proposed_actions:
+        for action in anchors:
             # 补充：向模拟器传递游戏类型和总人数
             expected_long_term_reward = predict_future_trajectory(
                 game_type=game_type,
@@ -90,14 +94,58 @@ class StrategicAgent(BaseAgent):
             })
 
         formatted_simulations = "\n".join([
-            f"Proposal Action: {s['action']} | Predicted 3-round Score: {s['expected_reward']}"
+            (
+                f"Anchor {s['action']:.2f} | Total 3-round Reward: "
+                f"{s['expected_reward'].get('total_reward')} | Path: "
+                f"{s['expected_reward'].get('steps_detail')}"
+            )
             for s in simulation_data
         ])
         
         decision_prompt_text = get_decision_template(history, alpha, beta, formatted_simulations, game_context)
         llm_final_choice = self.call_llm(decision_prompt_text, tag="decision")
-        
-        return self.parse_action(llm_final_choice)
+        final_action = self.parse_action(llm_final_choice)
+
+        best_anchor = None
+        best_reward = None
+        for s in simulation_data:
+            reward = s["expected_reward"].get("total_reward")
+            if reward is None:
+                continue
+            if best_reward is None or reward > best_reward:
+                best_reward = reward
+                best_anchor = s["action"]
+
+        chosen_sim = predict_future_trajectory(
+            game_type=game_type,
+            my_action=final_action,
+            alpha=alpha,
+            beta=beta,
+            num_players=num_players,
+            steps=3,
+        )
+        chosen_reward = chosen_sim.get("total_reward")
+        if best_reward is None:
+            best_reward = chosen_reward
+            best_anchor = final_action
+
+        delta = None
+        if chosen_reward is not None and best_reward is not None:
+            delta = round(chosen_reward - best_reward, 3)
+        self.llm_trace.append(
+            {
+                "tag": "decision_validation",
+                "model": "simulator",
+                "prompt": "post-decision validation",
+                "response": (
+                    f"chosen={final_action:.2f} best_anchor={best_anchor:.2f} "
+                    f"chosen_reward={chosen_reward} best_reward={best_reward} "
+                    f"delta={delta}"
+                ),
+            }
+        )
+
+        return final_action
 
     def reflect(self, my_action, others_actions):
         """
