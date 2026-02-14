@@ -40,3 +40,12 @@
 ### Tests
 - `python -m unittest tests/test_reasoning_mode.py`
 - `python -m unittest tests/test_game_context.py`
+
+## 2026-02-14
+- Replaced GDM discrete proposals with anchor-based guidance for continuous actions.
+- Added soft post-decision validation trace entry (no action override).
+- Updated decision prompt to emphasize anchors as references and allow any 0–1 value.
+- Added unit test for continuous-action prompt and validation logging.
+
+### Tests
+- `CONDA_OVERRIDE_CUDA=0 CONDA_NO_PLUGINS=true conda run -n rgrf python -m unittest discover -s tests`
