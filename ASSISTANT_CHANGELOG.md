@@ -1,5 +1,4 @@
 # Assistant Change Log
-
 ## 2026-02-09
 - Added unit tests for OpenRouter base URL normalization and header injection.
 - Added unit test to ensure `StrategicAgent.gdm_module` runs without a simulator signature error.
@@ -22,6 +21,10 @@
 
 ### Tests
 - `CONDA_OVERRIDE_CUDA=0 CONDA_NO_PLUGINS=true conda run -n rgrf python -m unittest discover -s tests`
+
+### Tests
+- `CONDA_OVERRIDE_CUDA=0 CONDA_NO_PLUGINS=true conda run -n rgrf python -m unittest tests/test_strategic_agent.py`
+- `CONDA_OVERRIDE_CUDA=0 CONDA_NO_PLUGINS=true conda run -n rgrf python -m unittest tests/test_reflection_prompt.py`
 
 ## 2026-02-10
 - Initialized git repository and added `.gitignore` for Python caches and `.env`.
@@ -52,3 +55,27 @@
 
 ### Tests
 - `CONDA_OVERRIDE_CUDA=0 CONDA_NO_PLUGINS=true conda run -n rgrf python -m unittest discover -s tests`
+
+## 2026-02-22
+- Process note: work on a new worktree branch, test in that branch, and only merge to master after user approval.
+- Clarified CPD action semantics in game context and added a reminder in strategic reflection prompt.
+
+
+## 2026-02-22
+- Relaxed StrategicAgent parsing to accept escaped `[FINAL_ACTION]` tags and `[FINAL_NOTE]` without `Note:`.
+- Added unit tests for escaped action parsing and missing-note-prefix extraction.
+- Added `RGRF_DECISION_VALIDATION` toggle to gate post-decision validation (extra simulator call + trace entry).
+- Added unit test for decision validation toggle behavior.
+- Clarified reflection prompt to surface Avg_Others and forbid including self-action in averages.
+- Added unit test for Avg_Others-only instruction in reflection prompt.
+
+## 2026-02-27
+- Clarified counterfactual handling in strategic reflection prompt with explicit clamp to [0, 1].
+- Clarified anchor role in decision prompt to emphasize trend-first selection and required a brief rationale when diverging.
+- Added unit tests for counterfactual clamp instruction and decision prompt anchor guidance.
+- Emphasized belief/correction output format requirements and made model parsing more tolerant to loose alpha/beta formats.
+- Added unit tests for belief prompt emphasis, correction prompt emphasis, and tolerant alpha/beta parsing.
+
+### Tests
+- `CONDA_OVERRIDE_CUDA=0 CONDA_NO_PLUGINS=true conda run -n rgrf python -m unittest tests/test_reflection_prompt.py tests/test_decision_prompt.py`
+- `CONDA_OVERRIDE_CUDA=0 CONDA_NO_PLUGINS=true conda run -n rgrf python -m unittest tests/test_belief_prompt.py tests/test_amm_cvm.py`

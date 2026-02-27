@@ -25,6 +25,29 @@ from library.validator import calculate_mse
 from prompts.belief_prompt import get_belief_template
 from prompts.reasoning_prompt import reasoning_instructions
 
+def _parse_model_params(text):
+    if not text:
+        return None
+    normalized = " ".join(str(text).split())
+    explicit = re.findall(
+        r"\[?\s*FINAL_MODEL\]?\s*alpha\s*[:=]\s*([0-9]*\.?[0-9]+)\s*,?\s*beta\s*[:=]\s*([0-9]*\.?[0-9]+)",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if explicit:
+        alpha, beta = explicit[-1]
+        return {"alpha": float(alpha), "beta": float(beta)}
+    pairs = re.findall(
+        r"alpha\s*[:=]\s*([0-9]*\.?[0-9]+)\s*,?\s*beta\s*[:=]\s*([0-9]*\.?[0-9]+)",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if pairs:
+        alpha, beta = pairs[-1]
+        return {"alpha": float(alpha), "beta": float(beta)}
+    return None
+
+
 def identify_personality(history, notes, last_model, call_llm, game_context=""):
     """
     AMM+CVM 核心模块：
@@ -60,11 +83,11 @@ def identify_personality(history, notes, last_model, call_llm, game_context=""):
     
     # --- 阶段 3: 动态验证 (CVM 2.0) ---
     # 从 LLM 的思考中解析出它想要的 alpha 和 beta
-    match = re.search(r"\[FINAL_MODEL\]\s*alpha:\s*([\d\.]+),\s*beta:\s*([\d\.]+)", response)
+    parsed = _parse_model_params(response)
     
-    if match:
-        proposed_alpha = float(match.group(1))
-        proposed_beta = float(match.group(2))
+    if parsed:
+        proposed_alpha = parsed["alpha"]
+        proposed_beta = parsed["beta"]
         
         # 物理验证 LLM 提议的参数是否真的符合历史事实
         proposed_mse = calculate_mse(history, proposed_alpha, proposed_beta)
@@ -82,12 +105,14 @@ def identify_personality(history, notes, last_model, call_llm, game_context=""):
             If yes, explain why. If no, revert to the most accurate model.
             {context_block}
             {reasoning_instructions()}
-            [FINAL_MODEL] alpha: <val>, beta: <val>
+            Output Format (exactly one line at the end):
+            [FINAL_MODEL] alpha: <float>, beta: <float>
+            Do not add extra text after the final line.
             """
             final_response = call_llm(correction_prompt, tag="belief_correction")
-            match = re.search(r"\[FINAL_MODEL\]\s*alpha:\s*([\d\.]+),\s*beta:\s*([\d\.]+)", final_response)
-            if match:
-                return {"alpha": float(match.group(1)), "beta": float(match.group(2))}
+            final_parsed = _parse_model_params(final_response)
+            if final_parsed:
+                return final_parsed
 
         return {"alpha": proposed_alpha, "beta": proposed_beta}
 

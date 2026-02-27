@@ -4,6 +4,7 @@ def get_game_context(game_type):
         return (
             "Game: Continuous Prisoner's Dilemma\n"
             "Reward = (1.5 * Average_of_Others_Actions) - Your_Action\n"
+            "Action semantics: higher action = more cooperation (higher cost), lower action = more self-interest.\n"
             "Action range: 0 to 1\n"
         )
     if game_type == "PGG":

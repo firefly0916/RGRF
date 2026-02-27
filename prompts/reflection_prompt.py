@@ -24,12 +24,15 @@ def get_reflection_template(my_action, opp_action, predicted, alpha, beta, game_
     return f"""
 [Strategic Review: Counterfactual Analysis]
 Last Action: {my_action} | Reality: Opponent played {opp_action}
+Avg_Others (opponents' average) = {opp_action}. Use Avg_Others only; do NOT include your own action.
 Our Model (alpha={alpha}, beta={beta}) expected them to play {predicted}.
 
 {context_block}
+Reminder: higher action = more cooperation; lower action = more self-interest.
 [Task]
 Reflect on the gap between reality and prediction. 
-Use the provided Counterfactual Experiment (+0.2 action) to determine if we should be more assertive or more cooperative.
+Use the provided Counterfactual Experiment (+0.2 action), but clamp it to [0, 1] before reasoning.
+Counterfactual: counterfactual_action = clamp(my_action + 0.2, 0, 1). Use this clamped value (never outside [0, 1]).
 Update our strategic approach.
 
 [Output]

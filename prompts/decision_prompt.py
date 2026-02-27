@@ -34,6 +34,9 @@ Anchor Simulations (3-round depth):
 Review the anchor performance and identify the payoff trend.
 - Look for "Pathways to Cooperation": An action might be low-reward now, but leads to high mutual gain by Step 3.
 - Observe the "Risk Case": If the worst-case reward is too low, the action is dangerous.
+- Anchors are reference points to reveal reward trends; they are not constraints.
+- Use the trend to choose the FINAL_ACTION you judge best (may differ from any anchor).
+- If your choice diverges from the anchor-implied trend or from the best anchor in the summary, briefly explain why.
 - You are NOT limited to these anchors; you may output ANY value in [0.00, 1.00].
 Choose a precise value (e.g., 0.65, 0.42) that best balances stability and profit.
 

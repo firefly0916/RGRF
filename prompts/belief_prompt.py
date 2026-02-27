@@ -41,6 +41,7 @@ Candidate Models & Physical Accuracy (MSE Error - lower is better):
 3. Select or propose the final alpha and beta that best describe them now.
 
 {reasoning_instructions()}
-Output Format:
+Output Format (exactly one line at the end):
 [FINAL_MODEL] alpha: <float>, beta: <float>
+Do not add extra text after the final line.
 """

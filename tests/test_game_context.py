@@ -10,6 +10,10 @@ class TestGameContext(unittest.TestCase):
         self.assertIn("Prisoner", text)
         self.assertIn("Reward =", text)
 
+    def test_cpd_context_mentions_cooperation_semantics(self):
+        text = gc.get_game_context("CPD")
+        self.assertIn("higher action = more cooperation", text.lower())
+
     def test_pgg_context_contains_formula(self):
         text = gc.get_game_context("PGG")
         self.assertIn("Public Goods", text)

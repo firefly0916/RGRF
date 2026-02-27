@@ -1,4 +1,5 @@
 import json
+import os
 import re  # 补充：正则模块
 from agents.base_agent import BaseAgent
 from library.validator import calculate_mse
@@ -116,34 +117,35 @@ class StrategicAgent(BaseAgent):
                 best_reward = reward
                 best_anchor = s["action"]
 
-        chosen_sim = predict_future_trajectory(
-            game_type=game_type,
-            my_action=final_action,
-            alpha=alpha,
-            beta=beta,
-            num_players=num_players,
-            steps=3,
-        )
-        chosen_reward = chosen_sim.get("total_reward")
-        if best_reward is None:
-            best_reward = chosen_reward
-            best_anchor = final_action
+        if _decision_validation_enabled():
+            chosen_sim = predict_future_trajectory(
+                game_type=game_type,
+                my_action=final_action,
+                alpha=alpha,
+                beta=beta,
+                num_players=num_players,
+                steps=3,
+            )
+            chosen_reward = chosen_sim.get("total_reward")
+            if best_reward is None:
+                best_reward = chosen_reward
+                best_anchor = final_action
 
-        delta = None
-        if chosen_reward is not None and best_reward is not None:
-            delta = round(chosen_reward - best_reward, 3)
-        self.llm_trace.append(
-            {
-                "tag": "decision_validation",
-                "model": "simulator",
-                "prompt": "post-decision validation",
-                "response": (
-                    f"chosen={final_action:.2f} best_anchor={best_anchor:.2f} "
-                    f"chosen_reward={chosen_reward} best_reward={best_reward} "
-                    f"delta={delta}"
-                ),
-            }
-        )
+            delta = None
+            if chosen_reward is not None and best_reward is not None:
+                delta = round(chosen_reward - best_reward, 3)
+            self.llm_trace.append(
+                {
+                    "tag": "decision_validation",
+                    "model": "simulator",
+                    "prompt": "post-decision validation",
+                    "response": (
+                        f"chosen={final_action:.2f} best_anchor={best_anchor:.2f} "
+                        f"chosen_reward={chosen_reward} best_reward={best_reward} "
+                        f"delta={delta}"
+                    ),
+                }
+            )
 
         return final_action
 
@@ -186,8 +188,9 @@ class StrategicAgent(BaseAgent):
 
     def parse_action(self, text):
         try:
+            cleaned = text.replace("\\[", "[").replace("\\]", "]") if text else ""
             pattern = r"\[FINAL_ACTION\]\s*Action:\s*([\d\.]+)"
-            match = re.search(pattern, text)
+            match = re.search(pattern, cleaned)
             if match:
                 return max(0.0, min(1.0, float(match.group(1))))
             return 0.5
@@ -196,10 +199,13 @@ class StrategicAgent(BaseAgent):
 
     def extract_note(self, text):
         try:
-            pattern = r"\[FINAL_NOTE\]\s*Note:\s*(.*)"
-            match = re.search(pattern, text, re.DOTALL)
+            cleaned = text.replace("\\[", "[").replace("\\]", "]") if text else ""
+            pattern = r"\[FINAL_NOTE\]\s*(?:Note:\s*)?(.*)"
+            match = re.search(pattern, cleaned, re.DOTALL)
             if match:
-                return match.group(1).strip()
+                note = match.group(1).strip()
+                if note:
+                    return note
             return "No strategic insight captured this round."
         except Exception:
             return "Reflection failed."
@@ -211,6 +217,14 @@ class StrategicAgent(BaseAgent):
             os.makedirs('storage')
         with open('storage/notes.txt', 'w', encoding='utf-8') as f:
             f.write(self.strategic_memory)
+
+
+def _decision_validation_enabled():
+    # RGRF_DECISION_VALIDATION controls post-decision validation in
+    # agents/strategic_agent.py::StrategicAgent.gdm_module (extra simulator call
+    # + decision_validation trace entry). Defaults to off.
+    enabled = os.getenv("RGRF_DECISION_VALIDATION", "0")
+    return str(enabled).strip().lower() in ("1", "true", "yes", "on")
 
 
 # import json

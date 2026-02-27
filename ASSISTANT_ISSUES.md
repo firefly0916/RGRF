@@ -1,5 +1,19 @@
 # Assistant Issues Log
 
+## 2026-02-27
+- Issue: `CONDA_OVERRIDE_CUDA=0 CONDA_NO_PLUGINS=true conda run -n rgrf python main_experiment.py` in `soft-constraint-prompts` produced no output after ~10s; process terminated (no stdout observed).
+  Status: investigated. Capturing stdout to file with `PYTHONUNBUFFERED=1` showed the run progressed but all LLM calls failed with `Connection error` to `openai/gpt-4o` (likely network/API access in Codex environment). Output not appearing is consistent with buffering/capture; the run is not stuck.
+- Issue: Strategic agent shows over-cooperation in later rounds versus zero_shot, leading to low/negative payoffs.
+  Status: noted for later tuning.
+- Issue: Opponent model (alpha/beta) oscillates across rounds, causing unstable decision anchors.
+  Status: noted for later tuning.
+- Issue: Belief/reflection should clamp predicted opponent actions to [0, 1] to avoid negative expected values.
+  Status: noted for later tuning.
+
+## 2026-02-22
+- Issue: `conda run -n rgrf python main_experiment.py` in `soft-constraint-prompts` produced no output after ~80s; terminated manually; no new `results/experiment_*` files created.
+  Status: unresolved (likely waiting on first LLM call or blocked before first print).
+
 ## 2026-02-09
 - Issue: conda commands failed without `CONDA_OVERRIDE_CUDA=0 CONDA_NO_PLUGINS=true` (permission/plugin errors).
   Status: mitigated by using those env vars for conda commands.
